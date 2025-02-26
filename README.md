@@ -16,8 +16,8 @@ This project aims to create a community-driven platform for running AI capabilit
 ## Download & Try the App 🚀
 You can download the latest APK in two variants:
 
-1. [breeze2-android-demo (breeze2)](https://huggingface.co/MediaTek-Research/Breeze2-android-demo/resolve/main/breeze2-android-demo-20250219_breeze2.apk)
-2. [breeze2-android-demo (llama3_2)](https://huggingface.co/MediaTek-Research/Breeze2-android-demo/resolve/main/breeze2-android-demo-20250219_llama3_2.apk)
+1. [BreezeApp (breeze2)](https://huggingface.co/MediaTek-Research/BreezeApp/resolve/main/breeze-app-20250226_breeze2.apk)
+2. [BreezeApp (llama3_2)](https://huggingface.co/MediaTek-Research/BreezeApp/resolve/main/breeze2-android-demo-20250219_llama3_2.apk)
 
 Choose the APK based on your preferred default LLM model. Both versions support switching between models after installation.
 
