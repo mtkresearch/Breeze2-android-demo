@@ -136,6 +136,8 @@ public class ChatActivity extends AppCompatActivity implements ChatMessageAdapte
     private final Object initLock = new Object();
     private static final int INIT_DELAY_MS = AppConstants.INIT_DELAY_MS;
 
+    private boolean hasReceivedResponse = false;  // Add class field
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -646,9 +648,9 @@ public class ChatActivity extends AppCompatActivity implements ChatMessageAdapte
             // Set UI to generation state BEFORE starting generation
             setSendButtonsAsStop(true);
             
+            hasReceivedResponse = false;  // Reset at start of generation
             llmService.generateStreamingResponse(formattedPrompt, new LLMEngineService.StreamingResponseCallback() {
                 private final StringBuilder currentResponse = new StringBuilder();
-                private boolean hasReceivedResponse = false;
                 private boolean isGenerating = true;  // Track generation state
 
                 @Override
@@ -673,8 +675,13 @@ public class ChatActivity extends AppCompatActivity implements ChatMessageAdapte
                 runOnUiThread(() -> {
                     if (finalResponse != null && !finalResponse.equals(AppConstants.LLM_DEFAULT_ERROR_RESPONSE)) {
                         String response = finalResponse.trim();
-                        if (response.isEmpty() && !aiMessage.hasContent()) {
-                            aiMessage.updateText(AppConstants.LLM_EMPTY_RESPONSE_ERROR);
+                        if (response.isEmpty()) {
+                            // If we never received any valid tokens (still showing "thinking...")
+                            if (!hasReceivedResponse) {
+                                aiMessage.updateText(AppConstants.LLM_INVALID_TOKEN_ERROR);
+                            } else if (!aiMessage.hasContent()) {
+                                aiMessage.updateText(AppConstants.LLM_EMPTY_RESPONSE_ERROR);
+                            }
                         } else if (!response.isEmpty()) {
                             aiMessage.updateText(finalResponse);
                         }
@@ -749,15 +756,18 @@ public class ChatActivity extends AppCompatActivity implements ChatMessageAdapte
                             // Show stopping feedback
                             Toast.makeText(ChatActivity.this, ChatActivity.this.getString(R.string.stopping_generation), Toast.LENGTH_SHORT).show();
                             
-                            // Stop generation
+                            // Stop generation and wait for completion
                             llmService.stopGeneration();
                             
-                            // Reset UI state
-                            setSendButtonsAsStop(false);
-                            
-                            // Keep button enabled but update appearance
-                            binding.sendButton.setImageResource(R.drawable.ic_send);
-                            binding.sendButtonExpanded.setImageResource(R.drawable.ic_send);
+                            // Wait for a short delay to ensure generation has stopped
+                            new Handler().postDelayed(() -> {
+                                // Reset UI state after delay
+                                setSendButtonsAsStop(false);
+                                
+                                // Keep button enabled but update appearance
+                                binding.sendButton.setImageResource(R.drawable.ic_send);
+                                binding.sendButtonExpanded.setImageResource(R.drawable.ic_send);
+                            }, 1000); // 1 second delay to ensure generation has stopped
                         }
                     };
                     binding.sendButton.setOnClickListener(stopListener);
