@@ -752,6 +752,9 @@ public class ChatActivity extends AppCompatActivity implements ChatMessageAdapte
                             // Stop generation
                             llmService.stopGeneration();
                             
+                            // Reset UI state
+                            setSendButtonsAsStop(false);
+                            
                             // Keep button enabled but update appearance
                             binding.sendButton.setImageResource(R.drawable.ic_send);
                             binding.sendButtonExpanded.setImageResource(R.drawable.ic_send);
